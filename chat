@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Written by: Mateus Rodrigues de Morais
+
+USER_LANG=$(echo $LANG | cut -d '.' -f 1)
+
+if [ $USER_LANG="pt_BR" ]
+then
+	echo "Seu idioma é o Português"
+	# Defining localized strings
+elif [ $USER_LANG="en_EN" ]
+then
+	echo "Su languaje es el Español"
+	# Defining localized strings
+else
+	echo "Your language is English"
+	# Defining localized strings
+fi
