@@ -33,7 +33,10 @@ else
 fi
 
 # Reads the username
-read -e -p "$ENTER_NAME" USERNAME
+while [ -z $USERNAME ]
+do
+	read -e -p "$ENTER_NAME" USERNAME
+done
 
 # Prints welcome message
 echo $WELCOME_MESSAGE $USERNAME
