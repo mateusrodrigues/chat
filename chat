@@ -1,18 +1,39 @@
 #!/bin/bash
 
+# chat
 # Written by: Mateus Rodrigues de Morais
 
+# Clears out the console
+# clear
+
+# Reads the user language
 USER_LANG=$(echo $LANG | cut -d '.' -f 1)
 
-if [ $USER_LANG="pt_BR" ]
+# Defines localized string based on user language
+if [ $USER_LANG = "pt_BR" ]
 then
 	echo "Seu idioma é o Português"
+
 	# Defining localized strings
-elif [ $USER_LANG="en_EN" ]
+	ENTER_NAME="Digite seu nome: "
+	WELCOME_MESSAGE="Bem-vindo(a),"
+
+elif [ $USER_LANG = "en_EN" ]
 then
-	echo "Su languaje es el Español"
+	echo "Su idioma es Español"
+
 	# Defining localized strings
+	# Localized string in Spanish to be defined
 else
 	echo "Your language is English"
+
 	# Defining localized strings
+	ENTER_NAME="Type in your name: "
+	WELCOME_MESSAGE="Welcome,"
 fi
+
+# Reads the username
+read -e -p "$ENTER_NAME" USERNAME
+
+# Prints welcome message
+echo $WELCOME_MESSAGE $USERNAME
