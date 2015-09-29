@@ -1,0 +1,175 @@
+#!/bin/bash
+
+# chat
+# Written by: Mateus Rodrigues de Morais
+# Chat rooms are located at: /etc/chat.d/rooms
+# Chat logs are located at: /etc/chat.d/logs
+
+ROOMS_DIR="/etc/chat.d/rooms"
+LOG_FILE="/etc/chat.d/logs/chatlog.log"
+
+# Creates the log file if it doesn't exists
+if [ -f $LOG_FILE ]
+then
+	touch $LOG_FILE
+fi
+
+# Checks for GUI
+if [ -f $DISPLAY ]
+then
+	exit
+fi
+
+# Clears out the console
+clear
+
+#------------
+# FUNCTIONS -
+#------------
+
+# localize_string()
+# localizes the screen messages
+localize_strings() {
+	# Reads the user language
+	USER_LANG=$(echo $LANG | cut -d '.' -f 1 | cut -d '_' -f 1)
+
+	# Defines localized string based on user language
+	if [ $USER_LANG = "pt" ]
+	then
+		echo "Seu idioma é o Português"
+
+		# Defining localized strings
+		ENTER_NAME="Digite seu nome: "
+		WELCOME_MESSAGE="Bem-vindo(a),"
+		LOBBY_MESSAGE="Vocé está no lobby."
+		ROOM_PROMPT="Para iniciar, digite a sala onde você deseja entrar: "
+		ROOM_NOT_EXIST="Essa sala ainda não existe, portanto, será criada e você será inserido(a) nela."
+		ROOMT_EXISTS="Sala encontrada! Você será inserido(a) nela."
+		HAS_ENTERED="entrou."
+		HAS_EXITED="saiu."
+		SAYS="diz: "
+		MESSAGE_PROMPT="Digite sua mensagem: "
+		QUIT_COMMAND=".sair"
+
+	elif [ $USER_LANG = "es" ]
+	then
+		echo "Su idioma es Español"
+
+		# Defining localized strings
+		# Localized string in Spanish to be defined
+	else
+		echo "Your language is English"
+
+		# Defining localized strings
+		ENTER_NAME="Type in your name: "
+		WELCOME_MESSAGE="Welcome,"
+		LOBBY_MESSAGE="You're now in the lobby."
+		ROOM_PROMPT="To get you started, please type in the name of the room you want to get into: "
+		ROOM_NOT_EXIST="This room does not exist, therefore, it will be created and you will be logged into it."
+		ROOM_EXISTS="Room found! You will be logged into it."
+		HAS_ENTERED="has entered."
+		HAS_EXITED="has exited."
+		SAYS="says: "
+		MESSAGE_PROMPT="Type in your message: "
+		QUIT_COMMAND=".quit"
+	fi
+}
+
+# get_username()
+# gets the username based on user input
+get_username() {
+	# Reads the username
+	while [ -z $USERNAME ]
+	do
+		read -e -p "$ENTER_NAME" USERNAME
+	done
+
+	# Prints welcome message
+	echo $WELCOME_MESSAGE $USERNAME
+	echo "-------------------------------"
+}
+
+# set_room()
+# sets the room the user wants to get into
+set_room() {
+	# Asks for the room the user wants to get into
+	echo $LOBBY_MESSAGE
+	while [ -z $ROOM ]
+	do
+		read -e -p "$ROOM_PROMPT" ROOM
+	done
+
+	# Creates the chat room file
+	if [ -f $ROOMS_DIR/$ROOM ]
+	then
+		echo $ROOM_EXISTS
+	else
+		echo $ROOM_NOT_EXIST
+
+		# Creates the room file
+		touch $ROOMS_DIR/$ROOM
+	fi
+
+	# Broadcasts user entrance in chatroom
+	echo $USERNAME $HAS_ENTERED >> $ROOMS_DIR/$ROOM
+
+	# --- [LOG] ---
+	# Logs the user insertion to room
+	echo "$(date) - The user ${USERNAME} has been logged into the room ${ROOM}" >> $LOG_FILE
+}
+
+# show_room()
+# shows the room with xterm
+show_room() {
+	xterm -e "tail -f $ROOMS_DIR/$ROOM" &
+	TASKID=$(jobs | tail -1 | egrep -o '^\[[0-9]\]' | egrep -o [0-9])
+}
+
+# send_message()
+# takes three arguments: username, message and chat room name
+send_message() {
+	echo "[${1}] $SAYS ${2} - $(date +"%T")" >> $ROOMS_DIR/${3}
+}	
+
+# iterate messages()
+# iterates forever until the user chooses to quit.
+# Sends messages to the room.
+iterate_messages() {
+	# Creates the iteration process that allows users to always type in messages
+	while [ "$MESSAGE" != "$QUIT_COMMAND" ]
+	do
+		read -e -p "$MESSAGE_PROMPT" MESSAGE
+
+		if [ "$MESSAGE" != "$QUIT_COMMAND" ]; then
+			send_message $USERNAME "${MESSAGE}" $ROOM
+
+			# --- [LOG] ---
+			# Logs the user has sent a message
+			echo "$(date) - The user ${USERNAME} has sent a message to room ${ROOM}" >> $LOG_FILE
+		else
+			echo $USERNAME $HAS_EXITED >> $ROOMS_DIR/$ROOM
+
+			# --- [LOG] ---
+			# Logs the user has exited the chat room
+			echo "$(date) - The user ${USERNAME} has exited the room ${ROOM}" >> $LOG_FILE
+		fi
+	done
+	
+	kill %$TASKID
+}
+
+#---------------------------------
+# PROGRAM EXECUTION STARTS HERE! -
+#---------------------------------
+
+# main()
+# the main function
+main() {
+	localize_strings
+	get_username
+	set_room
+	show_room
+	iterate_messages
+}
+
+main
