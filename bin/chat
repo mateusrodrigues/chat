@@ -27,6 +27,15 @@ clear
 # FUNCTIONS -
 #------------
 
+# set_colors()
+# sets the bash output colors
+set_colors() {
+	TXTRED='\e[0;31m' # Red
+	TXTGREEN='\e[0;32m' # Green
+	TXTBLUE='\e[0;34m' # Blue
+	TXTRST='\e[0m'    # Text Reset
+}
+
 # localize_string()
 # localizes the screen messages
 localize_strings() {
@@ -47,7 +56,6 @@ localize_strings() {
 		ROOMT_EXISTS="Sala encontrada! Você será inserido(a) nela."
 		HAS_ENTERED="entrou."
 		HAS_EXITED="saiu."
-		SAYS="diz: "
 		MESSAGE_PROMPT="Digite sua mensagem: "
 		QUIT_COMMAND=".sair"
 
@@ -56,7 +64,16 @@ localize_strings() {
 		echo "Su idioma es Español"
 
 		# Defining localized strings
-		# Localized string in Spanish to be defined
+		ENTER_NAME="Escriba su nombre: "
+		WELCOME_MESSAGE="Bienvenido(a),"
+		LOBBY_MESSAGE="Usted está en el lobby."
+		ROOM_PROMPT="Para empezar, por favor escriba el nombre de la sala en la que desea ingresar: "
+		ROOM_NOT_EXIST="Esta sala no existe, por lo tanto, se creará y usted podrá acceder a ella."
+		ROOMT_EXISTS="Sala encontrado! Va a estar conectado a ella."
+		HAS_ENTERED="ha entrado."
+		HAS_EXITED="ha salido."
+		MESSAGE_PROMPT="Escribe tu mensaje: "
+		QUIT_COMMAND=".salir"
 	else
 		echo "Your language is English"
 
@@ -69,7 +86,6 @@ localize_strings() {
 		ROOM_EXISTS="Room found! You will be logged into it."
 		HAS_ENTERED="has entered."
 		HAS_EXITED="has exited."
-		SAYS="says: "
 		MESSAGE_PROMPT="Type in your message: "
 		QUIT_COMMAND=".quit"
 	fi
@@ -128,7 +144,7 @@ show_room() {
 # send_message()
 # takes three arguments: username, message and chat room name
 send_message() {
-	echo "[${1}] $SAYS ${2} - $(date +"%T")" >> $ROOMS_DIR/${3}
+	echo -e "${TXTGREEN}[${1}]${TXTRST} ${2} - ${TXTBLUE}$(date +"%T")${TXTRST}" >> $ROOMS_DIR/${3}
 }	
 
 # iterate messages()
